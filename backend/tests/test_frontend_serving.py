@@ -2,7 +2,7 @@
 
 import pytest
 from starlette.testclient import TestClient
-from backend.app.main import app, FRONTEND_DIST_DIR
+from app.main import app, FRONTEND_DIST_DIR
 
 
 @pytest.fixture

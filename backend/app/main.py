@@ -3,20 +3,36 @@
 from contextlib import asynccontextmanager
 import os
 from pathlib import Path
+import sys
 from typing import AsyncGenerator
+
+# Ensure package root (backend directory) is in sys.path
+_current_file = Path(__file__).resolve()
+_backend_dir = _current_file.parent.parent
+if str(_backend_dir) not in sys.path:
+    sys.path.insert(0, str(_backend_dir))
+
 from fastapi import FastAPI, HTTPException, Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
-from backend.app.api.routes import api_router
-from backend.app.core.config import settings
-from backend.app.core.security import (
+from app.api.routes import api_router
+from app.core.config import settings
+from app.core.security import (
     ContentLengthLimitMiddleware,
     SecurityHeadersMiddleware,
 )
-from backend.app.ml.pipeline import ModelService
+from app.ml.pipeline import ModelService
+
+# Register backwards-compatibility aliases in sys.modules
+try:
+    import app
+    sys.modules.setdefault("backend.app", app)
+    sys.modules.setdefault("backend.app.main", sys.modules[__name__])
+except ImportError:
+    pass
 
 
 @asynccontextmanager
@@ -48,6 +64,7 @@ app.add_middleware(ContentLengthLimitMiddleware)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.ALLOWED_ORIGINS,
+    allow_origin_regex=r"^https:\/\/.*\.vercel\.app$",
     allow_credentials=True,
     allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["*"],
@@ -169,4 +186,4 @@ if __name__ == "__main__":
     import uvicorn
 
     port = int(os.environ.get("PORT", "8080"))
-    uvicorn.run("backend.app.main:app", host="0.0.0.0", port=port)
+    uvicorn.run("app.main:app", host="0.0.0.0", port=port)

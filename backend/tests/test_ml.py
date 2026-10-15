@@ -2,7 +2,7 @@
 
 import numpy as np
 import pytest
-from backend.app.ml.pipeline import (
+from app.ml.pipeline import (
     FEATURE_NAMES,
     ModelService,
     generate_synthetic_dataset,

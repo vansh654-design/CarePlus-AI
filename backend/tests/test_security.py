@@ -2,7 +2,7 @@
 
 import pytest
 from starlette.testclient import TestClient
-from backend.app.main import app
+from app.main import app
 
 
 @pytest.fixture
@@ -37,6 +37,7 @@ def test_error_response_does_not_leak_stack_trace(client: TestClient):
     # Ensure standard sensitive stacktrace indicators are absent
     assert "Traceback (most recent call last)" not in body
     assert "backend/app" not in body
+    assert "app/main" not in body
     assert "File \"" not in body
 
 

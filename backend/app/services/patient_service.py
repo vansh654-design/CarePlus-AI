@@ -1,8 +1,8 @@
 """Business logic service for synthetic patient management and dashboard statistics."""
 
 from datetime import datetime, timezone
-from backend.app.data.patients_store import get_all_patients, get_patient_by_id
-from backend.app.schemas.patient import (
+from app.data.patients_store import get_all_patients, get_patient_by_id
+from app.schemas.patient import (
     DashboardSummary,
     PatientRecord,
     PatientSummary,

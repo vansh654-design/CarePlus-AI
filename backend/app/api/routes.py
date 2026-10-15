@@ -3,16 +3,16 @@
 from datetime import datetime, timezone
 import uuid
 from fastapi import APIRouter, HTTPException, Query, status
-from backend.app.core.config import settings
-from backend.app.ml.pipeline import ModelService
-from backend.app.schemas.assessment import AssessmentRequest, AssessmentResponse
-from backend.app.schemas.model_card import ModelCardResponse
-from backend.app.schemas.patient import (
+from app.core.config import settings
+from app.ml.pipeline import ModelService
+from app.schemas.assessment import AssessmentRequest, AssessmentResponse
+from app.schemas.model_card import ModelCardResponse
+from app.schemas.patient import (
     DashboardSummary,
     PatientRecord,
     PatientSummary,
 )
-from backend.app.services.patient_service import PatientService
+from app.services.patient_service import PatientService
 
 api_router = APIRouter()
 

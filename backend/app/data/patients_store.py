@@ -4,7 +4,7 @@ Provides 14 synthetic demonstration records with realistic observation history.
 All data is 100% synthetic for educational and hackathon demonstration purposes.
 """
 
-from backend.app.schemas.patient import (
+from app.schemas.patient import (
     ObservationEntry,
     PatientRecord,
     PatientSummary,

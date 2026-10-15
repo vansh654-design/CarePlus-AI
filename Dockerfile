@@ -21,7 +21,7 @@ FROM python:3.12-slim AS runner
 # Prevent Python from writing .pyc files and enable unbuffered output
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    PYTHONPATH=/app \
+    PYTHONPATH=/app:/app/backend \
     PORT=8080
 
 WORKDIR /app
@@ -46,4 +46,4 @@ USER appuser
 EXPOSE 8080
 
 # Bind to 0.0.0.0 and listen on the port provided by Cloud Run's PORT env var
-CMD ["sh", "-c", "uvicorn backend.app.main:app --host 0.0.0.0 --port ${PORT:-8080}"]
+CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8080}"]

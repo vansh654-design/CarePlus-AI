@@ -20,8 +20,8 @@ from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 
-from backend.app.schemas.assessment import FeatureContribution, ThresholdFlag
-from backend.app.schemas.model_card import EvaluationMetrics, ModelCardResponse
+from app.schemas.assessment import FeatureContribution, ThresholdFlag
+from app.schemas.model_card import EvaluationMetrics, ModelCardResponse
 
 
 FEATURE_NAMES = [
