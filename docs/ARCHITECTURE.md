@@ -146,3 +146,20 @@
   - Assessment result display, feature waterfall rendering, and JSON export.
   - Model transparency holdout metric display and limitation visibility.
   - Full client-side routing across all navigation views.
+
+---
+
+## 7. Production Deployment Model (Google Cloud Run & Docker)
+
+CarePulse AI is packaged as a single unified container service for serverless, autoscaling deployment on **Google Cloud Run**:
+
+1. **Multi-Stage Build Pipeline**:
+   - **Stage 1 (`frontend-builder`)**: Node.js 20 Alpine installs frontend dependencies via `npm ci` and compiles the React/TypeScript SPA to static production assets in `/build/frontend/dist`.
+   - **Stage 2 (`runner`)**: Python 3.12 Slim installs production backend dependencies (`pip install -r backend/requirements.txt`), copies the FastAPI backend code to `/app/backend`, and copies the compiled frontend assets to `/app/frontend/dist`.
+2. **Unified Port & Process Model**:
+   - The container runs as an unprivileged non-root user (`appuser`, UID 10001).
+   - Listens on `0.0.0.0:${PORT:-8080}` as required by Google Cloud Run.
+   - FastAPI serves both the RESTful API under `/api` and the React frontend SPA with client-side HTML5 History API fallback routing (`/{full_path:path}`).
+3. **Stateless Scalability**:
+   - Container instances scale horizontally from 0 to N with zero persistent disk dependencies.
+   - The ML model pipeline initializes once in memory upon container cold-start, enabling instant deterministic predictions without cold external model fetching.

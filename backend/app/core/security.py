@@ -23,8 +23,8 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
             "default-src 'self'; "
             "img-src 'self' data:; "
             "style-src 'self' 'unsafe-inline'; "
-            "script-src 'self'; "
-            "connect-src 'self' http://localhost:* http://127.0.0.1:*;"
+            "script-src 'self' 'unsafe-inline'; "
+            "connect-src 'self' https: http://localhost:* http://127.0.0.1:*;"
         )
         response.headers["X-Demonstration-Mode"] = "CarePulse-Synthetic-Educational-Only"
         return response

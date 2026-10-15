@@ -1,11 +1,14 @@
 """CarePulse AI - FastAPI application entrypoint."""
 
 from contextlib import asynccontextmanager
+import os
+from pathlib import Path
 from typing import AsyncGenerator
 from fastapi import FastAPI, HTTPException, Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import FileResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles
 
 from backend.app.api.routes import api_router
 from backend.app.core.config import settings
@@ -95,16 +98,75 @@ async def generic_exception_handler(request: Request, exc: Exception) -> JSONRes
     )
 
 
+# Frontend static distribution directory
+FRONTEND_DIST_DIR = Path(
+    os.environ.get(
+        "FRONTEND_DIST_DIR",
+        Path(__file__).resolve().parent.parent.parent / "frontend" / "dist",
+    )
+)
+
 # Mount the API router under /api
 app.include_router(api_router, prefix="/api")
 
+# Mount production assets directory if it exists
+assets_dir = FRONTEND_DIST_DIR / "assets"
+if assets_dir.is_dir():
+    app.mount("/assets", StaticFiles(directory=str(assets_dir)), name="frontend_assets")
+
+
+@app.get("/favicon.svg", include_in_schema=False)
+async def serve_favicon():
+    """Serves the frontend favicon."""
+    favicon_path = FRONTEND_DIST_DIR / "favicon.svg"
+    if favicon_path.is_file():
+        return FileResponse(favicon_path, media_type="image/svg+xml")
+    raise HTTPException(status_code=404, detail="Favicon not found.")
+
 
 @app.get("/", tags=["Root"])
-async def root_redirect():
-    """Root endpoint redirecting or pointing to API documentation."""
+async def root_endpoint():
+    """Serves the frontend SPA index.html in production, or API info when running API-only."""
+    index_file = FRONTEND_DIST_DIR / "index.html"
+    if index_file.is_file():
+        return FileResponse(index_file)
     return {
         "message": "CarePulse AI API is operational.",
         "docs_url": "/docs",
         "health_url": "/api/health",
         "demonstration_mode": True,
     }
+
+
+@app.get("/{full_path:path}", include_in_schema=False)
+async def spa_fallback(full_path: str):
+    """Serves static files from dist or falls back to index.html for client-side SPA routing."""
+    # Never intercept API, docs, or OpenAPI routes
+    if (
+        full_path.startswith("api/")
+        or full_path == "api"
+        or full_path in ("docs", "redoc", "openapi.json")
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"API endpoint '/{full_path}' not found.",
+        )
+
+    # Direct file match in frontend/dist (e.g., manifest.json, robots.txt)
+    requested_file = FRONTEND_DIST_DIR / full_path
+    if requested_file.is_file():
+        return FileResponse(requested_file)
+
+    # SPA routing fallback: send index.html for client-side routes (e.g. /patients, /assessment)
+    index_file = FRONTEND_DIST_DIR / "index.html"
+    if index_file.is_file():
+        return FileResponse(index_file)
+
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Page not found.")
+
+
+if __name__ == "__main__":
+    import uvicorn
+
+    port = int(os.environ.get("PORT", "8080"))
+    uvicorn.run("backend.app.main:app", host="0.0.0.0", port=port)

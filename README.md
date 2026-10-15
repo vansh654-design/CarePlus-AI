@@ -289,13 +289,41 @@ This transparently demonstrates to reviewers exactly how much each vital sign in
 
 | Suite | Runner | Total Tests | Passed | Failed |
 | :--- | :--- | :--- | :--- | :--- |
-| **Backend Integration & ML** | Pytest 8.2.2 | 16 | **16** | 0 |
+| **Backend Integration, ML & Serving** | Pytest 8.2.2 | 20 | **20** | 0 |
 | **Frontend UI & Components** | Vitest 1.6.0 | 9 | **9** | 0 |
-| **Total Test Suite** | | **25** | **25** | **0** |
+| **Total Test Suite** | | **29** | **29** | **0** |
 
 ---
 
-## 11. GitHub Submission Instructions
+## 11. Containerization & Google Cloud Run Deployment
+
+CarePulse AI is packaged as a unified multi-stage container image that builds the production React Vite frontend and serves it directly alongside the FastAPI ML backend on port 8080 (or the dynamic `$PORT` environment variable required by Cloud Run).
+
+### Local Docker Build & Test
+```powershell
+# Build container image
+docker build -t carepulse-ai:latest .
+
+# Run container locally
+docker run --rm -p 8080:8080 -e PORT=8080 carepulse-ai:latest
+
+# Verify in browser or terminal
+Invoke-RestMethod http://127.0.0.1:8080/api/health
+```
+
+### Google Cloud Run Deployment
+CarePulse AI can be deployed directly from source to Cloud Run with a single command:
+```powershell
+gcloud run deploy carepulse-ai `
+  --source . `
+  --region us-central1 `
+  --allow-unauthenticated `
+  --port 8080
+```
+
+---
+
+## 12. GitHub Submission Instructions
 
 As required by the hackathon submission rules:
 - **Public GitHub Repository**
@@ -310,7 +338,7 @@ git branch
 
 # 2. Add files and commit
 git add .
-git commit -m "feat: complete CarePulse AI application for healthcare hackathon submission"
+git commit -m "feat: complete CarePulse AI application with Cloud Run containerization"
 
 # 3. Add public remote and push
 git remote add origin https://github.com/<YOUR_USERNAME>/carepulse-ai.git
@@ -319,6 +347,6 @@ git push -u origin main
 
 ---
 
-## 12. License
+## 13. License
 
 This project is licensed under the MIT License — see the [LICENSE](./LICENSE) file for details.
